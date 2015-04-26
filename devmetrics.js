@@ -75,8 +75,9 @@
       '"session":":sessionId",' +
       '"correlation":":sessionId",' + //better correlation?
       '"request_uri":":statsdKey",' +
-      '"message":"client - :remote-addr  [:date] :method :url HTTP/:http-version :status :res[content-length] :referrer :user-agent " ' +
+      '"message":"client - :remote-addr  [:date] :method :url HTTP/:http-version :status :res[content-length] :referrer :user-agent ",' +
       '"version":"' + version + '" ,' +
+      '"timestamp":"' + (new Date().getTime()) + '" ,' +
       //end of common
       '"status_code":":status",' +
       '"uri":":statsdKey",' +
@@ -154,6 +155,7 @@
           "request_uri": global.dmdata['request_uri'],
           "message": "database request",
           "version": version,
+          "timestamp": new Date().getTime(),
 
           "uri": statsdKey,
           "method": method,
