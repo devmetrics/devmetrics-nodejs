@@ -1,1 +1,2 @@
-# devmetrics.io - monitoring solution for Node.js
+# devmetrics.io
+monitoring solution for Node.js
