@@ -1,7 +1,15 @@
 (function() {
 
   module.exports = function(app, options) {
+    var mode = null;
+    if (options && options['mode']) {
+      mode = options['mode'];
+    }
+
     if (global.devmetrics) {
+      if (mode == 'logger') {
+        return global.devmetrics.logger;
+      }
       return global.devmetrics;
     }
 
@@ -41,6 +49,11 @@
       ],
       exitOnError: false
     });
+
+    loggerObj['app_event'] = function(event_name) {
+      loggerObj.info('App Event: ' + event_name); // change event_type field
+      metrics.increment('application.' + event_name);
+    }
 
     loggerObj.info('Checkout dashboards @ http://devmetrics.io/dashboard/' + app_id);
 
@@ -188,8 +201,19 @@
       loggerObj.info("mongoose not found, no db instrumentation");
     }
 
+    if (options && options['uncaughtException'] == true) {
+      process.on('uncaughtException', function(err) {
+        loggerObj.error(err);
+        metrics.increment('application.uncaughtException');
+      })
+    }
+
     global.devmetrics = {'logger': loggerObj, 'metrics': metrics, 'requestLogs': requestLogHandler,
       'requestMetrics': requestMetricHandler, 'instrumentModel': instrumentModel};
+
+    if (mode == 'logger') {
+      return global.devmetrics.logger;
+    }
     return global.devmetrics;
   }
 
