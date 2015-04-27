@@ -1,7 +1,7 @@
 {
   "name": "devmetrics",
-  "version": "0.1.2",
-  "description": "Node.js monitoring solution. Reference the express module devmetrics-nodejs in your app to get basic logging, metrics and dashboards. Follow guidelines at devmetrics.io to extend the solution.",
+  "version": "0.1.8",
+  "description": "Node.js monitoring solution. Fully open source. Logs, metrics, alerts, dashboards.",
   "main": "devmetrics.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -18,10 +18,12 @@
     "logs",
     "exceptions",
     "alerts",
-    "alerting"
+    "alerting",
+	"telemetry",
+	"dashboards"
   ],
   "author": "devmetrics.io <contact@devmetrics.io> (http://devmetrics.io)",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/devmetrics/devmetrics-nodejs/issues"
   },
