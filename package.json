@@ -1,6 +1,6 @@
 {
   "name": "devmetrics",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Node.js monitoring solution. Fully open source. Logs, metrics, alerts, dashboards.",
   "main": "devmetrics.js",
   "scripts": {
@@ -19,8 +19,8 @@
     "exceptions",
     "alerts",
     "alerting",
-	"telemetry",
-	"dashboards"
+    "telemetry",
+    "dashboards"
   ],
   "author": "devmetrics.io <contact@devmetrics.io> (http://devmetrics.io)",
   "license": "MIT",
