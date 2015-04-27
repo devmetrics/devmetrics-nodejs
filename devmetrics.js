@@ -95,7 +95,7 @@
       '"status_code":":status",' +
       '"uri":":statsdKey",' +
       '"status_code":":status" ,' +
-      '"response_time":":response-time" ,' +
+      '"response_time":":response-time"' +
       '}', { 'stream': logsStream });
 
     var statsdURL = function (req, res, next) {
