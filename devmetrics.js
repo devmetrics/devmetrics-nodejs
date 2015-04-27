@@ -84,7 +84,7 @@
     var requestLogHandler = morgan('{'+
       '"app_id":"' + app_id + '" ,' +
       '"event_type":"http_request",' +
-      '"host":"' + host + '" ,' +
+      '"host":"' + hostname + '" ,' +
       '"session":":sessionId",' +
       '"correlation":":sessionId",' + //better correlation?
       '"request_uri":":statsdKey",' +
@@ -162,7 +162,7 @@
         loggerObj.info(JSON.stringify({
           "app_id": app_id,
           "event_type": "db_call",
-          "host": host,
+          "host": hostname,
           "session": global.dmdata['session'],
           "correlation": global.dmdata['session'],
           "request_uri": global.dmdata['request_uri'],
@@ -197,7 +197,7 @@
           JSON.stringify({
             "app_id": app_id,
             "event_type": "func_call",
-            "host": host,
+            "host": hostname,
             "session": global.dmdata['session'],
             "correlation": global.dmdata['session'],
             "request_uri": global.dmdata['request_uri'],
@@ -217,7 +217,7 @@
     };
 
     try {
-      var mongoose = require('mongoose');
+      var mongoose = global.mongoose_instance ? global.mongoose_instance : require('mongoose');
 //      mongoose.Query.prototype.exec = dmExecWrapper(mongoose.Query.prototype.exec, 'exec');
       mongoose.Query.prototype.findOne = dmWrapModelFunction(mongoose.Query.prototype.findOne, 'findOne');
       mongoose.Query.prototype.find = dmWrapModelFunction(mongoose.Query.prototype.find, 'find');
@@ -226,6 +226,7 @@
       mongoose.Query.prototype.remove = dmWrapModelFunction(mongoose.Query.prototype.update, 'remove');
     } catch (e) {
       loggerObj.info("mongoose not found, no db instrumentation");
+      loggerObj.info(e);
     }
 
     if (options && options['uncaughtException'] == true) {
