@@ -207,6 +207,7 @@
 
             "method": func_name,
             "return": 'N/A',
+            "domain": 'mongodb',
             "response_time": new Date().getTime() - dmFuncStart,
             "error": 0
           })
