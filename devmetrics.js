@@ -173,6 +173,7 @@
           "uri": statsdKey,
           "method": method,
           "return": 'N/A',
+          "domain": 'mongodb',
           "response_time": duration,
           "error": 0
         })
@@ -207,7 +208,6 @@
 
             "method": func_name,
             "return": 'N/A',
-            "domain": 'mongodb',
             "response_time": new Date().getTime() - dmFuncStart,
             "error": 0
           })
