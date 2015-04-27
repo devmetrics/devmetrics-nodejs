@@ -134,7 +134,7 @@
 
     var dmWrapModelFunction = function (fn, funcName) {
       return function () {
-        global.starttime = new Date().getTime();
+        global.dmstarttime = new Date().getTime();
 
         for (var i in arguments) {
           if (arguments[i] && typeof(arguments[i]) === 'function') {
@@ -151,7 +151,7 @@
       return function () {
         var res = fn.apply(this, arguments);
         var end = new Date().getTime();
-        var duration = end - global.starttime;
+        var duration = end - global.dmstarttime;
 
         var collectionName = modelName;
         var method = funcName;
@@ -189,6 +189,32 @@
       };
     };
 
+    var dmFunctionWrap = function (fn, func_name) {
+      return function () {
+        var dmFuncStart = new Date().getTime();
+        var res = fn.apply(this, arguments);
+        loggerObj.info(
+          JSON.stringify({
+            "app_id": app_id,
+            "event_type": "func_call",
+            "host": host,
+            "session": global.dmdata['session'],
+            "correlation": global.dmdata['session'],
+            "request_uri": global.dmdata['request_uri'],
+            "message": "function call: " + func_name,
+            "version": version,
+            "timestamp": new Date().getTime(),
+
+            "method": func_name,
+            "return": 'N/A',
+            "response_time": new Date().getTime() - dmFuncStart,
+            "error": 0
+          })
+        );
+        return res;
+      };
+    };
+
     try {
       var mongoose = require('mongoose');
 //      mongoose.Query.prototype.exec = dmExecWrapper(mongoose.Query.prototype.exec, 'exec');
@@ -209,7 +235,7 @@
     }
 
     global.devmetrics = {'logger': loggerObj, 'metrics': metrics, 'requestLogs': requestLogHandler,
-      'requestMetrics': requestMetricHandler, 'instrumentModel': instrumentModel};
+      'requestMetrics': requestMetricHandler, 'instrumentModel': instrumentModel, 'funcWrap': dmFunctionWrap};
 
     if (mode == 'logger') {
       return global.devmetrics.logger;
