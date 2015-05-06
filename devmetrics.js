@@ -24,7 +24,7 @@
     }
 
     var version = options['code_version'] ? options['software_version'] : 1;
-    var host = options['host'];
+    var host = options['host'] ? options['host'] : 'service.devmetrics.io';
 
     var app_id = options['token'] ? options['token'] : hostname.replace(/[\W_]+/g," "); // only alphanum for token
 
@@ -41,7 +41,7 @@
           handleExceptions: true
         }),
         new winston.transports.Console({
-          level: 'debug',
+          level: 'info',
           handleExceptions: true,
           json: false,
           colorize: true
@@ -64,7 +64,15 @@
     ///// REQUEST LOGS
     var logsStream  = {
       write: function(message, encoding) {
-        loggerObj.info(message);
+        loggerObj.debug(message);
+        // @todo, check that stdout enabled
+        var obj = JSON.parse(message);
+        var msg = 'http request: ' + obj['status_code'] + ' ' + obj['uri'] + ' took ' + Math.round(obj['response_time']) + ' ms';
+        if (obj['status_code'] >= 400) {
+          loggerObj.error(msg);
+        } else {
+          loggerObj.info(msg);
+        }
       }
     };
 
@@ -142,7 +150,6 @@
           }
         }
         var res = fn.apply(this, arguments);
-        var end = new Date().getTime();
         return res;
       };
     };
@@ -154,30 +161,34 @@
         var duration = end - global.dmstarttime;
 
         var collectionName = modelName;
-        var method = funcName;
+        var method = funcName ? funcName : 'saved'; //@todo temp save bad supported hack
         var query = '?';
         var doc = '?';
         var statsdKey = 'db--' + collectionName + '-' + method;
 
-        loggerObj.info(JSON.stringify({
+        var event = {
           "app_id": app_id,
           "event_type": "db_call",
           "host": hostname,
           "session": global.dmdata['session'],
           "correlation": global.dmdata['session'],
           "request_uri": global.dmdata['request_uri'],
-          "message": "database request",
+          "message": 'MongoDB:' + statsdKey + ' took ' + duration + ' ms',
           "version": version,
           "timestamp": new Date().getTime(),
 
           "uri": statsdKey,
           "method": method,
           "return": 'N/A',
-          "domain": 'mongodb',
           "response_time": duration,
-          "error": 0
-        })
-        );
+          "error": arguments[0] ? 1 : 0 // if err obj is defined
+        };
+        loggerObj.debug(JSON.stringify(event));
+        if (event['error']) {
+          loggerObj.error(event.message);
+        } else {
+          loggerObj.info(event.message);
+        }
 
         return res;
       };
@@ -190,11 +201,33 @@
       };
     };
 
+    try {
+      var mongoose = global.mongoose_instance ? global.mongoose_instance : require('mongoose');
+//      mongoose.Query.prototype.exec = dmExecWrapper(mongoose.Query.prototype.exec, 'exec');
+
+      mongoose.Query.prototype.findOne = dmWrapModelFunction(mongoose.Query.prototype.findOne, 'findOne');
+      mongoose.Query.prototype.find = dmWrapModelFunction(mongoose.Query.prototype.find, 'find');
+      mongoose.Query.prototype.count = dmWrapModelFunction(mongoose.Query.prototype.count, 'distinct');
+      mongoose.Query.prototype.update = dmWrapModelFunction(mongoose.Query.prototype.update, 'update');
+      mongoose.Model.prototype.save = dmWrapModelFunction(mongoose.Model.prototype.save, 'save');
+      mongoose.Query.prototype.remove = dmWrapModelFunction(mongoose.Query.prototype.remove, 'remove');
+    } catch (e) {
+      loggerObj.info("mongoose not found, no db instrumentation");
+      loggerObj.info(e);
+    }
+
+    if (options && options['uncaughtException'] == true) {
+      process.on('uncaughtException', function(err) {
+        loggerObj.error(err);
+        metrics.increment('application.uncaughtException');
+      })
+    }
+
     var dmFunctionWrap = function (fn, func_name) {
       return function () {
         var dmFuncStart = new Date().getTime();
         var res = fn.apply(this, arguments);
-        loggerObj.info(
+        loggerObj.debug(
           JSON.stringify({
             "app_id": app_id,
             "event_type": "func_call",
@@ -208,6 +241,7 @@
 
             "method": func_name,
             "return": 'N/A',
+            "domain": 'mongodb',
             "response_time": new Date().getTime() - dmFuncStart,
             "error": 0
           })
@@ -216,28 +250,79 @@
       };
     };
 
-    try {
-      var mongoose = global.mongoose_instance ? global.mongoose_instance : require('mongoose');
-//      mongoose.Query.prototype.exec = dmExecWrapper(mongoose.Query.prototype.exec, 'exec');
-      mongoose.Query.prototype.findOne = dmWrapModelFunction(mongoose.Query.prototype.findOne, 'findOne');
-      mongoose.Query.prototype.find = dmWrapModelFunction(mongoose.Query.prototype.find, 'find');
-      mongoose.Query.prototype.count = dmWrapModelFunction(mongoose.Query.prototype.count, 'distinct');
-      mongoose.Query.prototype.update = dmWrapModelFunction(mongoose.Query.prototype.update, 'update');
-      mongoose.Query.prototype.remove = dmWrapModelFunction(mongoose.Query.prototype.update, 'remove');
-    } catch (e) {
-      loggerObj.info("mongoose not found, no db instrumentation");
-      loggerObj.info(e);
-    }
+    var dmExceptionLogger = function(e) {
+      loggerObj.debug(
+        JSON.stringify({
+          "app_id": app_id,
+          "event_type": "exception",
+          "host": hostname,
+          "session": global.dmdata['session'],
+          "correlation": global.dmdata['session'],
+          "request_uri": global.dmdata['request_uri'],
+          "message": "exception: " + e.message,
+          "version": version,
+          "timestamp": new Date().getTime(),
 
-    if (options && options['uncaughtException'] == true) {
-      process.on('uncaughtException', function(err) {
-        loggerObj.error(err);
-        metrics.increment('application.uncaughtException');
-      })
-    }
+          "domain": 'N/A',
+          "uri": global.dmdata['request_uri'],
+          "error": 1,
+          "exception_stack": e.stack,
+          "exception_class": "N/A",
+          "exception_text": e.message,
+          "exception_critical": false
+        })
+      );
 
-    global.devmetrics = {'logger': loggerObj, 'metrics': metrics, 'requestLogs': requestLogHandler,
-      'requestMetrics': requestMetricHandler, 'instrumentModel': instrumentModel, 'funcWrap': dmFunctionWrap};
+      loggerObj.error(e);
+    };
+
+    var dmApplicationLogger = function(text) {
+      loggerObj.debug(
+        JSON.stringify({
+          "app_id": app_id,
+          "event_type": "user_event",
+          "host": hostname,
+          "session": global.dmdata['session'],
+          "correlation": global.dmdata['session'],
+          "request_uri": '_global',
+          "message": "application event: " + text,
+          "version": version,
+          "timestamp": new Date().getTime(),
+
+          "severity": 'info',
+          "uri": 'N/A'
+        })
+      );
+
+      loggerObj.warn("application event: " + text);
+    };
+
+    var dmUserLogger = function(level, text) {
+      loggerObj.debug(
+        JSON.stringify({
+          "app_id": app_id,
+          "event_type": "user_event",
+          "host": hostname,
+          "session": global.dmdata['session'],
+          "correlation": global.dmdata['session'],
+          "request_uri": global.dmdata['request_uri'],
+          "message": "user event: " + text,
+          "version": version,
+          "timestamp": new Date().getTime(),
+
+          "severity": level,
+          "uri": 'N/A'
+        })
+      );
+
+      if (loggerObj[level] && typeof loggerObj[level] == 'function') {
+        loggerObj[level]("application event: " + text);
+      }
+    };
+
+    global.devmetrics = {'morganLogger': loggerObj, 'metrics': metrics, 'requestLogs': requestLogHandler,
+      'requestMetrics': requestMetricHandler, 'instrumentModel': instrumentModel, 'funcWrap': dmFunctionWrap,
+      'exception': dmExceptionLogger, 'logger': dmUserLogger, 'appEvent': dmApplicationLogger};
 
     if (mode == 'logger') {
       return global.devmetrics.logger;
