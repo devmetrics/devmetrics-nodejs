@@ -8,7 +8,7 @@ require('devmetrics')
 
 ```
 Enjoy your dashboard: 
-[![dashboard](https://scontent-sea.xx.fbcdn.net/hphotos-xpt1/v/t1.0-9/10404197_10205991648926805_3492915196781060882_n.jpg?oh=074ce74a397dbb1b7e94b3ccee8ff18d&oe=55DD322B)](http://devmetrics.io)
+[![dashboard](https://scontent-sea.xx.fbcdn.net/hphotos-xta1/v/t1.0-9/11203054_10206058127588730_2345332034079223974_n.jpg?oh=d1c0b2685c22f40b7bbac9f5faed3c77&oe=55E1A949)](http://devmetrics.io)
 
 
 Follow guidelines at [devmetrics.io](http://devmetrics.io) to extend the solution.
