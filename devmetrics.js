@@ -39,7 +39,13 @@
           node_name: app_id,
           host: host,
           handleExceptions: true
-        }),
+        })
+      ],
+      exitOnError: false
+    });
+
+    var stdLogger = new winston.Logger({
+      transports: [
         new winston.transports.Console({
           level: 'info',
           handleExceptions: true,
@@ -50,12 +56,82 @@
       exitOnError: false
     });
 
-    loggerObj['app_event'] = function(event_name) {
-      loggerObj.info('App Event: ' + event_name); // change event_type field
-      metrics.increment('application.' + event_name);
-    }
+    var dmUserLogger = function(level, text) {
+      loggerObj.debug(
+        JSON.stringify({
+          "app_id": app_id,
+          "event_type": "user_event",
+          "host": hostname,
+          "session": global.dmdata['session'],
+          "correlation": global.dmdata['session'],
+          "request_uri": global.dmdata['request_uri'],
+          "message": "user event: " + text,
+          "version": version,
+          "timestamp": new Date().getTime(),
 
-    loggerObj.info('Checkout dashboards @ http://devmetrics.io/dashboard/' + app_id);
+          "severity": level,
+          "uri": 'N/A'
+        })
+      );
+
+      if (stdLogger[level] && typeof stdLogger[level] == 'function') {
+        stdLogger[level](text);
+      }
+    };
+//
+//    loggerObj['app_event'] = function(event_name) {
+//      loggerObj.info('App Event: ' + event_name); // change event_type field
+//      metrics.increment('application.' + event_name);
+//    }
+
+    var dmExceptionLogger = function(e) {
+      loggerObj.debug(
+        JSON.stringify({
+          "app_id": app_id,
+          "event_type": "exception",
+          "host": hostname,
+          "session": global.dmdata['session'],
+          "correlation": global.dmdata['session'],
+          "request_uri": global.dmdata['request_uri'],
+          "message": "exception: " + e.message,
+          "version": version,
+          "timestamp": new Date().getTime(),
+
+          "domain": 'N/A',
+          "uri": global.dmdata['request_uri'],
+          "error": 1,
+          "exception_stack": e.stack,
+          "exception_class": "N/A",
+          "exception_text": e.message,
+          "exception_critical": false
+        })
+      );
+
+      dmUserLogger('error', e);
+    };
+
+    var dmApplicationLogger = function(text) {
+      loggerObj.debug(
+        JSON.stringify({
+          "app_id": app_id,
+          "event_type": "user_event",
+          "host": hostname,
+          "session": global.dmdata['session'],
+          "correlation": global.dmdata['session'],
+          "request_uri": '_global',
+          "message": "application event: " + text,
+          "version": version,
+          "timestamp": new Date().getTime(),
+
+          "severity": 'info',
+          "uri": 'N/A'
+        })
+      );
+
+      stdLogger.info("application event: " + text);
+    };
+
+    dmUserLogger('info', 'Checkout dashboards @ http://devmetrics.io/dashboard/' + app_id);
 
     ///// STATSD SENDER
     var lynx = require('lynx');
@@ -69,9 +145,9 @@
         var obj = JSON.parse(message);
         var msg = 'http request: ' + obj['status_code'] + ' ' + obj['uri'] + ' took ' + Math.round(obj['response_time']) + ' ms';
         if (obj['status_code'] >= 400) {
-          loggerObj.error(msg);
+          stdLogger.error(msg);
         } else {
-          loggerObj.info(msg);
+          stdLogger.info(msg);
         }
       }
     };
@@ -185,9 +261,9 @@
         };
         loggerObj.debug(JSON.stringify(event));
         if (event['error']) {
-          loggerObj.error(event.message);
+          stdLogger.error(event.message);
         } else {
-          loggerObj.info(event.message);
+          stdLogger.info(event.message);
         }
 
         return res;
@@ -212,8 +288,8 @@
       mongoose.Model.prototype.save = dmWrapModelFunction(mongoose.Model.prototype.save, 'save');
       mongoose.Query.prototype.remove = dmWrapModelFunction(mongoose.Query.prototype.remove, 'remove');
     } catch (e) {
-      loggerObj.info("mongoose not found, no db instrumentation");
-      loggerObj.info(e);
+      dmUserLogger('warn', "mongoose not found, no db instrumentation");
+      dmExceptionLogger(e);
     }
 
     if (options && options['uncaughtException'] == true) {
@@ -248,76 +324,6 @@
         );
         return res;
       };
-    };
-
-    var dmExceptionLogger = function(e) {
-      loggerObj.debug(
-        JSON.stringify({
-          "app_id": app_id,
-          "event_type": "exception",
-          "host": hostname,
-          "session": global.dmdata['session'],
-          "correlation": global.dmdata['session'],
-          "request_uri": global.dmdata['request_uri'],
-          "message": "exception: " + e.message,
-          "version": version,
-          "timestamp": new Date().getTime(),
-
-          "domain": 'N/A',
-          "uri": global.dmdata['request_uri'],
-          "error": 1,
-          "exception_stack": e.stack,
-          "exception_class": "N/A",
-          "exception_text": e.message,
-          "exception_critical": false
-        })
-      );
-
-      loggerObj.error(e);
-    };
-
-    var dmApplicationLogger = function(text) {
-      loggerObj.debug(
-        JSON.stringify({
-          "app_id": app_id,
-          "event_type": "user_event",
-          "host": hostname,
-          "session": global.dmdata['session'],
-          "correlation": global.dmdata['session'],
-          "request_uri": '_global',
-          "message": "application event: " + text,
-          "version": version,
-          "timestamp": new Date().getTime(),
-
-          "severity": 'info',
-          "uri": 'N/A'
-        })
-      );
-
-      loggerObj.warn("application event: " + text);
-    };
-
-    var dmUserLogger = function(level, text) {
-      loggerObj.debug(
-        JSON.stringify({
-          "app_id": app_id,
-          "event_type": "user_event",
-          "host": hostname,
-          "session": global.dmdata['session'],
-          "correlation": global.dmdata['session'],
-          "request_uri": global.dmdata['request_uri'],
-          "message": "user event: " + text,
-          "version": version,
-          "timestamp": new Date().getTime(),
-
-          "severity": level,
-          "uri": 'N/A'
-        })
-      );
-
-      if (loggerObj[level] && typeof loggerObj[level] == 'function') {
-        loggerObj[level]("application event: " + text);
-      }
     };
 
     global.devmetrics = {'morganLogger': loggerObj, 'metrics': metrics, 'requestLogs': requestLogHandler,
