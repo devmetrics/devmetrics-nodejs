@@ -30,7 +30,7 @@
     var version = options['code_version'] ? options['software_version'] : 1;
     var host = options['host'] ? options['host'] : 'service.devmetrics.io';
 
-    var app_id = options['token'] ? options['token'] : hostname.replace(/[\W_]+/g," "); // only alphanum for token
+    var app_id = options['token'] ? options['token'] : hostname.replace(/[\W_]+/g, "_"); // only alphanum for token
 
     ///// LOGS
     var winston = require('winston'); require('winston-logstash');
