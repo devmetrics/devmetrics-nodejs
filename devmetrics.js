@@ -2,7 +2,10 @@
 
   module.exports = function(options) {
     var mode = null;
-    var app = options ? options['app'] : null;
+    if (!options) {
+      options = {};
+    }
+    var app = options['app'];
     if (options && options['mode']) {
       mode = options['mode'];
     }
