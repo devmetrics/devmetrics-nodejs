@@ -1,7 +1,8 @@
 (function() {
 
-  module.exports = function(app, options) {
+  module.exports = function(options) {
     var mode = null;
+    var app = options ? options['app'] : null;
     if (options && options['mode']) {
       mode = options['mode'];
     }
