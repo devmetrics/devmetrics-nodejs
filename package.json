@@ -1,6 +1,6 @@
 {
   "name": "devmetrics",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "description": "Node.js monitoring solution. Fully open source. Logs, metrics, alerts, dashboards.",
   "main": "devmetrics.js",
   "scripts": {
