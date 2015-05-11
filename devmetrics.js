@@ -309,29 +309,39 @@
       })
     }
 
-    var dmFunctionWrap = function (fn, func_name) {
+    var dmFunctionName = function(fun) {
+      var ret = fun.toString();
+      ret = ret.substr('function '.length);
+      ret = ret.substr(0, ret.indexOf('('));
+      return ret;
+    }
+
+    var dmFunctionWrap = function (fn, funcName) {
       return function () {
         var dmFuncStart = new Date().getTime();
         var res = fn.apply(this, arguments);
-        loggerObj.info(
-          JSON.stringify({
-            "app_id": app_id,
-            "event_type": "func_call",
-            "host": hostname,
-            "session": global.dmdata['session'],
-            "correlation": global.dmdata['session'],
-            "request_uri": global.dmdata['request_uri'],
-            "message": "function call: " + func_name,
-            "version": version,
-            "timestamp": new Date().getTime(),
+        var duration = new Date ().getTime() - dmFuncStart;
+        funcName = funcName ? funcName : dmFunctionName(fn);
+        var obj = {
+          "app_id": app_id,
+          "event_type": "user_call",
+          "host": hostname,
+          "session": global.dmdata['session'],
+          "correlation": global.dmdata['session'],
+          "request_uri": global.dmdata['request_uri'],
+          "message": "function call: " + funcName + ' took ' + duration + ' ms',
+          "version": version,
+          "timestamp": new Date().getTime(),
 
-            "method": func_name,
-            "return": 'N/A',
-            "domain": 'mongodb',
-            "response_time": new Date().getTime() - dmFuncStart,
-            "error": 0
-          })
-        );
+          "method": funcName,
+          "request_uri": funcName,
+          "return": 'N/A',
+          "domain": 'functions',
+          "response_time": duration,
+          "error": 0
+        };
+        loggerObj.info(JSON.stringify(obj));
+        stdLogger.info(obj['message']);
         return res;
       };
     };
