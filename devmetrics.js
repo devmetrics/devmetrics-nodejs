@@ -57,22 +57,26 @@
     });
 
     var dmUserLogger = function(level, text) {
-      loggerObj.debug(
-        JSON.stringify({
-          "app_id": app_id,
-          "event_type": "user_event",
-          "host": hostname,
-          "session": global.dmdata['session'],
-          "correlation": global.dmdata['session'],
-          "request_uri": global.dmdata['request_uri'],
-          "message": "user event: " + text,
-          "version": version,
-          "timestamp": new Date().getTime(),
+      var obj2send = JSON.stringify({
+        "app_id": app_id,
+        "event_type": "user_event",
+        "host": hostname,
+        "session": global.dmdata['session'],
+        "correlation": global.dmdata['session'],
+        "request_uri": global.dmdata['request_uri'],
+        "message": "user event: " + text,
+        "version": version,
+        "timestamp": new Date().getTime(),
 
-          "severity": level,
-          "uri": 'N/A'
-        })
-      );
+        "severity": level,
+        "uri": 'N/A'
+      });
+
+      if (loggerObj[level] && typeof loggerObj[level] == 'function') {
+        loggerObj[level](obj2send);
+      } else {
+        loggerObj.info(obj2send);
+      }
 
       if (stdLogger[level] && typeof stdLogger[level] == 'function') {
         stdLogger[level](text);
@@ -85,7 +89,7 @@
 //    }
 
     var dmExceptionLogger = function(e) {
-      loggerObj.debug(
+      loggerObj.error(
         JSON.stringify({
           "app_id": app_id,
           "event_type": "exception",
@@ -111,7 +115,7 @@
     };
 
     var dmApplicationLogger = function(text) {
-      loggerObj.debug(
+      loggerObj.warn(
         JSON.stringify({
           "app_id": app_id,
           "event_type": "user_event",
@@ -128,7 +132,7 @@
         })
       );
 
-      stdLogger.info("application event: " + text);
+      stdLogger.warn("application event: " + text);
     };
 
     dmUserLogger('info', 'Checkout dashboards @ http://devmetrics.io/dashboard/' + app_id);
@@ -140,13 +144,14 @@
     ///// REQUEST LOGS
     var logsStream  = {
       write: function(message, encoding) {
-        loggerObj.debug(message);
         // @todo, check that stdout enabled
         var obj = JSON.parse(message);
         var msg = 'http request: ' + obj['status_code'] + ' ' + obj['uri'] + ' took ' + Math.round(obj['response_time']) + ' ms';
         if (obj['status_code'] >= 400) {
+          loggerObj.error(message);
           stdLogger.error(msg);
         } else {
+          loggerObj.info(message);
           stdLogger.info(msg);
         }
       }
@@ -259,11 +264,12 @@
           "response_time": duration,
           "error": arguments[0] ? 1 : 0 // if err obj is defined
         };
-        loggerObj.debug(JSON.stringify(event));
         if (event['error']) {
           stdLogger.error(event.message);
+          loggerObj.error(JSON.stringify(event));
         } else {
           stdLogger.info(event.message);
+          loggerObj.info(JSON.stringify(event));
         }
 
         return res;
@@ -294,8 +300,8 @@
 
     if (options && options['uncaughtException'] == true) {
       process.on('uncaughtException', function(err) {
-        loggerObj.error(err);
-        metrics.increment('application.uncaughtException');
+        dmExceptionLogger(err);
+        stdLogger.error(err);
       })
     }
 
@@ -303,7 +309,7 @@
       return function () {
         var dmFuncStart = new Date().getTime();
         var res = fn.apply(this, arguments);
-        loggerObj.debug(
+        loggerObj.info(
           JSON.stringify({
             "app_id": app_id,
             "event_type": "func_call",
