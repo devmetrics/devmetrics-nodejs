@@ -334,7 +334,6 @@
           "timestamp": new Date().getTime(),
 
           "method": funcName,
-          "request_uri": funcName,
           "return": 'N/A',
           "domain": 'functions',
           "response_time": duration,
