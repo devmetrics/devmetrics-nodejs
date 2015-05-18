@@ -115,7 +115,7 @@
         })
       );
 
-      dmUserLogger('error', e);
+      stdLogger.error(e);
     };
 
     var dmApplicationLogger = function(text) {
@@ -137,6 +137,28 @@
       );
 
       stdLogger.warn("application event: " + text);
+    };
+
+    var dmFrontendLogger = function(eventtext, options) {
+      loggerObj.warn(
+        JSON.stringify({
+          "app_id": app_id,
+          "event_type": "frontend_event",
+          "host": hostname,
+          "session": global.dmdata['session'],
+          "correlation": global.dmdata['session'],
+          "request_uri": '_global',
+          "message": "frontend event: " + eventtext,
+          "version": version,
+          "timestamp": new Date().getTime(),
+
+          "severity": 'info',
+          "uri": 'N/A',
+          "options": options
+        })
+      );
+
+      stdLogger.info("frontend event: " + eventtext);
     };
 
     dmUserLogger('info', 'Checkout dashboards @ http://devmetrics.io/dashboard/' + app_id);
@@ -347,7 +369,7 @@
 
     global.devmetrics = {'morganLogger': loggerObj, 'metrics': metrics, 'requestLogs': requestLogHandler,
       'requestMetrics': requestMetricHandler, 'instrumentModel': instrumentModel, 'funcWrap': dmFunctionWrap,
-      'exception': dmExceptionLogger, 'logger': dmUserLogger, 'appEvent': dmApplicationLogger};
+      'exception': dmExceptionLogger, 'logger': dmUserLogger, 'appEvent': dmApplicationLogger, frontendEvent: dmFrontendLogger};
 
     if (mode == 'logger') {
       return global.devmetrics.logger;
