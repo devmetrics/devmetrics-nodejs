@@ -202,6 +202,8 @@
       '"host":"' + hostname + '" ,' +
       '"session":":sessionId",' +
       '"correlation":":sessionId",' + //better correlation?
+      '"referrer":":referrer",' +        //Polina 09-06-2015
+      '"user_agent":":user-agent",' +    //Polina 09-06-2015
       '"request_uri":":statsdKey",' +
       '"message":"client - :remote-addr  [:date] :method :url HTTP/:http-version :status :res[content-length] :referrer :user-agent ",' +
       '"version":"' + version + '" ,' +
