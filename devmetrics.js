@@ -234,7 +234,7 @@
 
       app.use(statsdURL);
       app.use(requestLogHandler);
-      app.use(requestMetricHandler);
+//      app.use(requestMetricHandler);
     }
 
     ///// Mongoose instrumentation
