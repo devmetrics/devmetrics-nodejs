@@ -164,8 +164,8 @@
     dmUserLogger('info', 'Checkout dashboards @ http://devmetrics.io/dashboard/' + app_id);
 
     ///// STATSD SENDER
-    var lynx = require('lynx');
-    var metrics = new lynx(host, 5546, {scope:app_id});
+//    var lynx = require('lynx');
+//    var metrics = new lynx(host, 5546, {scope:app_id});
 
     ///// REQUEST LOGS
     var logsStream  = {
@@ -221,8 +221,8 @@
     };
 
     ///// REQUEST METRICS
-    var expressStatsd = require('express-statsd');
-    var requestMetricHandler = expressStatsd({'client': metrics})
+//    var expressStatsd = require('express-statsd');
+//    var requestMetricHandler = expressStatsd({'client': metrics})
 
     if (app) {
       app.use(function (req, res, next) {
@@ -370,7 +370,7 @@
     };
 
     global.devmetrics = {'morganLogger': loggerObj, 'metrics': metrics, 'requestLogs': requestLogHandler,
-      'requestMetrics': requestMetricHandler, 'instrumentModel': instrumentModel, 'funcWrap': dmFunctionWrap,
+      'instrumentModel': instrumentModel, 'funcWrap': dmFunctionWrap,
       'exception': dmExceptionLogger, 'logger': dmUserLogger, 'appEvent': dmApplicationLogger, frontendEvent: dmFrontendLogger};
 
     if (mode == 'logger') {
