@@ -369,7 +369,7 @@
       };
     };
 
-    global.devmetrics = {'morganLogger': loggerObj, 'metrics': metrics, 'requestLogs': requestLogHandler,
+    global.devmetrics = {'morganLogger': loggerObj, 'requestLogs': requestLogHandler,
       'instrumentModel': instrumentModel, 'funcWrap': dmFunctionWrap,
       'exception': dmExceptionLogger, 'logger': dmUserLogger, 'appEvent': dmApplicationLogger, frontendEvent: dmFrontendLogger};
 
