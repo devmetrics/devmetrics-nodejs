@@ -4,7 +4,7 @@ Reference the express module **devmetrics** in your [Node.js](http://nodejs.org)
 
 ```js
 require('devmetrics')
-	(app, {'token': 'my-token'});
+	(app, {'app_id': 'my-app_id'});
 
 ```
 Enjoy your dashboard: 

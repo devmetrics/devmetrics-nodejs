@@ -30,7 +30,7 @@
     var version = options['code_version'] ? options['software_version'] : 1;
     var host = options['host'] ? options['host'] : 'service.devmetrics.io';
 
-    var app_id = options['token'] ? options['token'] : hostname.replace(/[\W_]+/g, "_"); // only alphanum for token
+    var app_id = options['app_id'] ? options['app_id'] : hostname.replace(/[\W_]+/g, "_"); // only alphanum for token
 
     ///// LOGS
     var winston = require('winston'); require('winston-logstash-udp');
@@ -202,6 +202,8 @@
       '"host":"' + hostname + '" ,' +
       '"session":":sessionId",' +
       '"correlation":":sessionId",' + //better correlation?
+      '"referrer":":referrer",' +        //Polina 09-06-2015
+      '"user_agent":":user-agent",' +    //Polina 09-06-2015
       '"request_uri":":statsdKey",' +
       '"message":"client - :remote-addr  [:date] :method :url HTTP/:http-version :status :res[content-length] :referrer :user-agent ",' +
       '"version":"' + version + '" ,' +
