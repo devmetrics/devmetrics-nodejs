@@ -33,13 +33,13 @@
     var app_id = options['token'] ? options['token'] : hostname.replace(/[\W_]+/g, "_"); // only alphanum for token
 
     ///// LOGS
-    var winston = require('winston'); require('winston-logstash');
+    var winston = require('winston'); require('winston-logstash-udp');
     winston.emitErrs = true;
     var loggerObj = new winston.Logger({
       transports: [
-        new winston.transports.Logstash({
+        new winston.transports.LogstashUDP({
           level: 'debug',
-          port: 5545,
+          port: 5546,
           node_name: app_id,
           host: host,
           handleExceptions: true
