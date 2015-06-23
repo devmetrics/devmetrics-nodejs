@@ -169,7 +169,7 @@
                 if (dimension) {
                     dimension += '.';
                 }
-                dimension += (key + "_" + p[key]);
+                dimension += (key + "_" + options[key]);
             }
         }
       loggerObj.info(
@@ -190,7 +190,7 @@
           })
       );
 
-      stdLogger.info("frontend event: " + eventtext);
+      stdLogger.info("metric: " + eventtext);
     };
 
     dmUserLogger('info', 'Checkout dashboards @ http://devmetrics.io/dashboard/' + app_id);
