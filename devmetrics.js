@@ -147,7 +147,7 @@
           "host": hostname,
           "session": global.dmdata['session'],
           "correlation": global.dmdata['session'],
-          "request_uri": '_global',
+          "request_uri": global.dmdata['request_uri'],
           "message": "frontend event: " + eventtext,
           "version": version,
           "timestamp": new Date().getTime(),
@@ -156,6 +156,38 @@
           "uri": 'N/A',
           "options": options
         })
+      );
+
+      stdLogger.info("frontend event: " + eventtext);
+    };
+
+    var dmMetricLogger = function(eventtext, options) {
+        var dimension = '';
+        options = options || {};
+        for (var key in options) {
+            if (options.hasOwnProperty(key)) {
+                if (dimension) {
+                    dimension += '.';
+                }
+                dimension += (key + "_" + p[key]);
+            }
+        }
+      loggerObj.info(
+          JSON.stringify({
+              "app_id": app_id,
+              "event_type": "metric",
+              "host": hostname,
+              "session": dimension,
+              "correlation": global.dmdata['session'],
+              "request_uri": global.dmdata['request_uri'],
+              "message": "metric: " + eventtext,
+              "version": version,
+              "timestamp": new Date().getTime(),
+
+              "severity": 'info',
+              "uri": eventtext,
+              "options": options
+          })
       );
 
       stdLogger.info("frontend event: " + eventtext);
@@ -371,7 +403,8 @@
 
     global.devmetrics = {'morganLogger': loggerObj, 'requestLogs': requestLogHandler,
       'instrumentModel': instrumentModel, 'funcWrap': dmFunctionWrap,
-      'exception': dmExceptionLogger, 'logger': dmUserLogger, 'appEvent': dmApplicationLogger, frontendEvent: dmFrontendLogger};
+      'exception': dmExceptionLogger, 'logger': dmUserLogger, 'appEvent': dmApplicationLogger, frontendEvent: dmFrontendLogger,
+    'metric': dmMetricLogger};
 
     if (mode == 'logger') {
       return global.devmetrics.logger;
