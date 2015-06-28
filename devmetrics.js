@@ -86,6 +86,18 @@
         stdLogger[level](text);
       }
     };
+
+      var infoLogger = function(text) {
+          dmUserLogger('info', text);
+      }
+
+      var warnLogger = function(text) {
+          dmUserLogger('warn', text);
+      }
+
+      var errorLogger = function(text) {
+          dmUserLogger('error', text);
+      }
 //
 //    loggerObj['app_event'] = function(event_name) {
 //      loggerObj.info('App Event: ' + event_name); // change event_type field
@@ -404,7 +416,8 @@
     global.devmetrics = {'morganLogger': loggerObj, 'requestLogs': requestLogHandler,
       'instrumentModel': instrumentModel, 'funcWrap': dmFunctionWrap,
       'exception': dmExceptionLogger, 'logger': dmUserLogger, 'appEvent': dmApplicationLogger, frontendEvent: dmFrontendLogger,
-    'metric': dmMetricLogger};
+    'metric': dmMetricLogger,
+    'info' : infoLogger, 'warn' : warnLogger, 'warning' : warnLogger, 'error' : errorLogger};
 
     if (mode == 'logger') {
       return global.devmetrics.logger;
