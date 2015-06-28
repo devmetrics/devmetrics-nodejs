@@ -205,7 +205,11 @@
       stdLogger.info("metric: " + eventtext);
     };
 
-    dmUserLogger('info', 'Checkout dashboards @ http://devmetrics.io/dashboard/' + app_id);
+      if (app) {
+        dmUserLogger('info', 'Checkout dashboard @ http://devmetrics.io/dashboard/' + app_id);
+      } else {
+        dmUserLogger('info', 'Checkout logs @ http://devmetrics.io/logs/'+app_id+'/tail/');
+      }
 
     ///// STATSD SENDER
 //    var lynx = require('lynx');
@@ -355,20 +359,22 @@
       };
     };
 
-    try {
-      var mongoose = global.mongoose_instance ? global.mongoose_instance : require('mongoose');
+      if (app) {
+          try {
+              var mongoose = global.mongoose_instance ? global.mongoose_instance : require('mongoose');
 //      mongoose.Query.prototype.exec = dmExecWrapper(mongoose.Query.prototype.exec, 'exec');
 
-      mongoose.Query.prototype.findOne = dmWrapModelFunction(mongoose.Query.prototype.findOne, 'findOne');
-      mongoose.Query.prototype.find = dmWrapModelFunction(mongoose.Query.prototype.find, 'find');
-      mongoose.Query.prototype.count = dmWrapModelFunction(mongoose.Query.prototype.count, 'distinct');
-      mongoose.Query.prototype.update = dmWrapModelFunction(mongoose.Query.prototype.update, 'update');
-      mongoose.Model.prototype.save = dmWrapModelFunction(mongoose.Model.prototype.save, 'save');
-      mongoose.Query.prototype.remove = dmWrapModelFunction(mongoose.Query.prototype.remove, 'remove');
-    } catch (e) {
-      dmUserLogger('warn', "mongoose not found, no db instrumentation");
-      dmExceptionLogger(e);
-    }
+              mongoose.Query.prototype.findOne = dmWrapModelFunction(mongoose.Query.prototype.findOne, 'findOne');
+              mongoose.Query.prototype.find = dmWrapModelFunction(mongoose.Query.prototype.find, 'find');
+              mongoose.Query.prototype.count = dmWrapModelFunction(mongoose.Query.prototype.count, 'distinct');
+              mongoose.Query.prototype.update = dmWrapModelFunction(mongoose.Query.prototype.update, 'update');
+              mongoose.Model.prototype.save = dmWrapModelFunction(mongoose.Model.prototype.save, 'save');
+              mongoose.Query.prototype.remove = dmWrapModelFunction(mongoose.Query.prototype.remove, 'remove');
+          } catch (e) {
+              dmUserLogger('warn', "mongoose not found, no db instrumentation");
+              dmExceptionLogger(e);
+          }
+      }
 
     if (options && options['uncaughtException'] == true) {
       process.on('uncaughtException', function(err) {
