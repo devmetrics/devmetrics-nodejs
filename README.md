@@ -6,7 +6,7 @@ Build on top of StatsD - InfluxDB - Grafana stack.
 
 We provide usage tracking and analytics solution, production-ready, scalable and opensource. Make smart product decisions timely with accurate usage data.
 
-It will take just few minutes to start seeing your users’ behavior.
+It will take just few minutes to start seeing your users behavior.
 
 ```js
 devmetrics = require('devmetrics')
