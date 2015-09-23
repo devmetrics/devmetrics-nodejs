@@ -1,6 +1,6 @@
 {
   "name": "devmetrics",
-  "version": "0.1.40",
+  "version": "0.1.41",
   "description": "Opensource Usage Analytic Stack.",
   "main": "lib/devmetrics",
   "scripts": {
