@@ -1,8 +1,8 @@
 {
   "name": "devmetrics",
   "version": "0.1.39",
-  "description": "Node.js monitoring solution. Fully open source. Logs, metrics, alerts, dashboards.",
-  "main": "devmetrics.js",
+  "description": "Opensource Usage Analytic Stack.",
+  "main": "lib/devmetrics",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -27,13 +27,7 @@
   "bugs": {
     "url": "https://github.com/devmetrics/devmetrics-nodejs/issues"
   },
-  "homepage": "http://devmetrics.io",
+  "homepage": "http://www.devmetrics.io",
   "dependencies": {
-    "morgan": "*",
-    "winston": "*",
-    "winston-logstash": "*",
-    "winston-logstash-udp": "*",
-    "lynx": "*",
-    "express-statsd": "*"
   }
 }
