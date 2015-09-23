@@ -9,8 +9,7 @@ We provide usage tracking and analytics solution, production-ready, scalable and
 It will take just few minutes to start seeing your users behavior.
 
 ```js
-devmetrics = require('devmetrics')
-	({'app_id': 'my_app_id'});
+var devmetrics = require('devmetrics')({'app_id': 'my_app_id'});
 devmetrics.userEvent('page_loaded_event');
 devmetrics.userEvent('button_click', ['red_button', 'android']);
 devmetrics.measure(123, 'page_load_time', ['index_page']);
