@@ -1,6 +1,6 @@
 {
   "name": "devmetrics",
-  "version": "0.1.39",
+  "version": "0.1.40",
   "description": "Opensource Usage Analytic Stack.",
   "main": "lib/devmetrics",
   "scripts": {
@@ -28,6 +28,5 @@
     "url": "https://github.com/devmetrics/devmetrics-nodejs/issues"
   },
   "homepage": "http://www.devmetrics.io",
-  "dependencies": {
-  }
+  "dependencies": {}
 }
